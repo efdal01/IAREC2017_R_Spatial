@@ -1,0 +1,94 @@
+---
+title: "OKU_Konferans"
+author: "EFDAL KAYA"
+date: "6 Ocak 2018"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Downloading Library
+install.packages("rgdal")
+install.packages("raster")
+install.packages("sp")
+install.packages("leaflet")
+install.packages("leaflet.extras")
+installed.packages("htmltools")
+installed.packages("(htmlwidgets")
+install.packages("magrittr")
+
+# Importing Library
+library(rgdal)
+library(raster)
+library(sp)
+library(leaflet)
+library(leaflet.extras)
+library(htmltools)
+library(htmlwidgets)
+library(magrittr)
+
+# Folder properties
+getwd()
+setwd("C:/Users/kayae/Desktop/ijeg/1_ijeg_oku/veri/")
+
+# Importing shapefiles
+aksaray <- shapefile("shp/shafiles/aksaray.shp")
+plot(aksaray)
+turkey <- shapefile("shp/shafiles/turkey.shp")
+plot(turkey)
+
+# Import data
+data <- read.csv("data/Veri.csv",header=FALSE, sep=";")
+colnames(data) <- c("Point_Number","Method","pH","Conductivity","PO4-P","PO4","Oxygen","Temperature","Latitude","Longitude","Elipsoid_Elevation")
+View(data)
+ncol(data)
+nrow(data)
+PN <- data[,1]
+View(PN)
+Method <- data[,2]
+pH <- data[,3]
+Conductivity <- data[,4]
+PO4_P <- data[,5]
+PO4 <- data[,6]
+Oxygen<- data[,7]
+Temp <- data[,8]
+Lat <- data[,9]
+Long <- data[,10]
+Elip_Elev <- data[,11]
+dataFrame <- data.frame(PN,Method,pH,Conductivity,PO4_P,PO4,Oxygen,Temp,Lat,Long,Elip_Elev)
+
+vis <- leaflet(options = leafletOptions(minZoom = 0, maxZoom = 18)) %>%
+  addTiles() %>%
+  addMarkers(lng = 34.20060, lat = 38.41592, popup = "Point Number 1") %>%
+  addMarkers(lng = 34.13161, lat = 38.40247, popup = "Point Number 2") %>%
+  addMarkers(lng = 34.13472, lat = 38.40544, popup = "Point Number 3") %>%
+  addMarkers(lng = 34.14949, lat = 38.40474, popup = "Point Number 4") %>%
+  addMarkers(lng = 34.19055, lat = 38.41000, popup = "Point Number 5") %>%
+  addMarkers(lng = 34.18705, lat = 38.40622, popup = "Point Number 6") %>%
+  addMarkers(lng = 34.17449, lat = 38.40880, popup = "Point Number 7") %>%
+  addMarkers(lng = 34.17862, lat = 38.41311, popup = "Point Number 8") %>%
+  
+  addPolygons(data= aksaray, weight=2.5, color="yellow", fillOpacity = 0.60)%>%
+  addPolygons(data= turkey, weight=0.5, color="black", fillColor = "gray", fillOpacity = 0.20)%>%
+  
+  addMiniMap(tiles = providers$Esri.WorldImagery,position = "bottomright",width= 200,height= 200,toggleDisplay = TRUE)%>%
+  
+  addEasyButton(easyButton(
+    icon="fa-globe", title="Zoom to Level 1",
+    onClick=JS("function(btn, vis){ vis.setZoom(1); }"))) %>%
+  addEasyButton(easyButton(
+    icon="fa-crosshairs", title="Locate Me",
+    onClick=JS("function(btn, vis){ vis.locate({setView: true}); }")))%>%
+  
+  addLegend(position = "topright", color = c("yellow","black"), label = c("Aksaray","Turkiye")) %>%
+  
+  addMeasure(position = "bottomleft",
+             primaryLengthUnit = "meters",
+             primaryAreaUnit = "sqmeters",
+             activeColor = "#3D535D",
+             completedColor = "#7D4479") %>%
+  
+  addGraticule(group = "Grid", interval = 6, style = list(color = "#FF0000", weight = 2))%>%
+  addLayersControl(overlayGroups = c("Grid"),
+                   options = layersControlOptions(collapsed = FALSE))
+vis
